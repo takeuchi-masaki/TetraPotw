@@ -94,6 +94,14 @@ export default class Tetris extends Phaser.Scene {
     set_next_queue() {
         this.next_queue_grid = [];
         for (let i = 0; i < 5; i++) {
+            if (this.next_blocks[i] == BlockType.I) {
+                const empty_row = [0, 0, 0, 0];
+                const full_row = [BlockType.I + 1, BlockType.I + 1, BlockType.I + 1, BlockType.I + 1];
+                this.next_queue_grid.push(empty_row);
+                this.next_queue_grid.push(full_row);
+                this.next_queue_grid.push(empty_row);
+                continue
+            }
             if (this.next_blocks[i] == BlockType.O) {
                 const empty_row = [0, 0, 0, 0];
                 this.next_queue_grid.push(empty_row);
@@ -111,7 +119,7 @@ export default class Tetris extends Phaser.Scene {
         }
     }
 
-    render_next() {
+    render_next_queue() {
         this.next_queue.putTilesAt(this.next_queue_grid, 0, 0, false, this.next_layer);
     }
 
@@ -213,6 +221,10 @@ export default class Tetris extends Phaser.Scene {
             this.game_grid.tap_left(this.current_block);
             this.game_grid.find_ghost(this.current_block);
             this.render_grid();
+            if (this.soft_drop_key.isDown) {
+                this.game_grid.soft_drop(this.current_block);
+                this.render_grid();
+            }
         });
         this.left_key.on('up', () => {
             this.das_left = DAS;
@@ -224,6 +236,10 @@ export default class Tetris extends Phaser.Scene {
             this.game_grid.tap_right(this.current_block);
             this.game_grid.find_ghost(this.current_block);
             this.render_grid();
+            if (this.soft_drop_key.isDown) {
+                this.game_grid.soft_drop(this.current_block);
+                this.render_grid();
+            }
         });
         this.right_key.on('up', () => {
             this.das_right = DAS;
@@ -238,6 +254,8 @@ export default class Tetris extends Phaser.Scene {
                 this.hold_block = this.current_block.type;
                 this.current_block = new Block(this.next_blocks.shift());
                 this.next_blocks.push(this.bag.next());
+                this.set_next_queue();
+                this.render_next_queue();
             } else {
                 const next_hold_type = this.current_block.type;
                 this.current_block = new Block(this.hold_block);
@@ -248,6 +266,11 @@ export default class Tetris extends Phaser.Scene {
             this.used_hold = true;
             this.set_hold_grid();
             this.render_hold();
+            if (this.last_pressed) {
+                this.das_right = Math.max(this.das_right, -1);
+            } else {
+                this.das_left = Math.max(this.das_left, -1);
+            }
         });
 
         // drop
@@ -264,7 +287,7 @@ export default class Tetris extends Phaser.Scene {
             this.render_grid();
             this.used_hold = false;
             this.set_next_queue();
-            this.render_next();
+            this.render_next_queue();
             if (this.last_pressed) {
                 this.das_right = Math.max(this.das_right, -1);
             } else {
@@ -277,7 +300,7 @@ export default class Tetris extends Phaser.Scene {
             this.init();
             this.render_grid();
             this.set_next_queue();
-            this.render_next();
+            this.render_next_queue();
             this.set_hold_grid();
             this.render_hold();
         });
@@ -299,6 +322,10 @@ export default class Tetris extends Phaser.Scene {
                     this.game_grid.hard_right(this.current_block);
                     this.game_grid.find_ghost(this.current_block);
                     this.render_grid();
+                    if (this.soft_drop_key.isDown) {
+                        this.game_grid.soft_drop(this.current_block);
+                        this.render_grid();
+                    }
                 }
             }
         } else {
@@ -312,6 +339,10 @@ export default class Tetris extends Phaser.Scene {
                     this.game_grid.hard_left(this.current_block);
                     this.game_grid.find_ghost(this.current_block);
                     this.render_grid();
+                    if (this.soft_drop_key.isDown) {
+                        this.game_grid.soft_drop(this.current_block);
+                        this.render_grid();
+                    }
                 }
             }
         }
