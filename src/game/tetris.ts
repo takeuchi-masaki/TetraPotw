@@ -158,6 +158,7 @@ export default class Tetris extends Phaser.Scene {
             this.empty_grid.push(empty_row);
         }
 
+        this.init();
         this.map = this.make.tilemap({ width: grid_width, height: grid_height, tileWidth: 32, tileHeight: 32 });
         const tileset = this.map.addTilesetImage('tileset');
         const background_layer = this.map.createBlankLayer('Background', tileset, 200, 50);
@@ -167,7 +168,6 @@ export default class Tetris extends Phaser.Scene {
         this.ghost_layer.alpha = 0.5;
         this.layer.scale = 1.5;
         this.ghost_layer.scale = 1.5;
-        this.init();
         this.render_grid();
         init_kickI();
         init_kickJLTSZ();
