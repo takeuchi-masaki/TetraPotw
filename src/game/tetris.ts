@@ -14,6 +14,7 @@ export default class Tetris extends Phaser.Scene {
     cw_key: Phaser.Input.Keyboard.Key;
     ccw_key: Phaser.Input.Keyboard.Key;
     hold_key: Phaser.Input.Keyboard.Key;
+    reset_key: Phaser.Input.Keyboard.Key;
 
     game_grid: Grid;
     bag: Bag;
@@ -22,6 +23,8 @@ export default class Tetris extends Phaser.Scene {
     next_blocks: Block[];
     map: Phaser.Tilemaps.Tilemap;
     layer: Phaser.Tilemaps.TilemapLayer;
+    next_queue: Phaser.Tilemaps.Tilemap;
+    next_queue_grid: number[][];
 
     used_hold: boolean;
     last_pressed: number;
@@ -29,19 +32,33 @@ export default class Tetris extends Phaser.Scene {
     das_right: number;
     prev_time: number;
 
+
+    preload() {
+        this.load.image('tileset', 'assets/tileset2.png');
+    }
+
     render_all() {
         this.map.putTilesAt(this.game_grid.grid.slice(4, HEIGHT + 3), 0, 0, false, this.layer);
         for (let i = 0; i < rotations[this.current_block.type][this.current_block.rotation].length; i++) {
             for (let j = 0; j < rotations[this.current_block.type][this.current_block.rotation][i].length; j++) {
                 if (rotations[this.current_block.type][this.current_block.rotation][i][j]) {
                     this.map.putTileAt(this.current_block.type + 1, this.current_block.x + j, this.current_block.y + i - 4, false, this.layer);
+                    // this.map.putTileAt(this.current_block.type + 1, this.current_block.x + j, this.current_block.ghost_y + i, false, this.layer);
                 }
             }
         }
     };
 
-    preload() {
-        this.load.image('tileset', 'assets/tileset.png');
+    init() {
+        this.game_grid = new Grid();
+        this.bag = new Bag();
+        this.current_block = new Block(this.bag.next());
+        this.next_blocks = [];
+        for (let i = 0; i < 5; i++) {
+            this.next_blocks.push(new Block(this.bag.next()));
+        }
+        this.hold_block = 0;
+        this.used_hold = false;
     }
 
     create() {
@@ -52,16 +69,7 @@ export default class Tetris extends Phaser.Scene {
         this.cw_key = this.input.keyboard.addKey('E');
         this.ccw_key = this.input.keyboard.addKey('W');
         this.hold_key = this.input.keyboard.addKey('Q');
-
-        this.game_grid = new Grid();
-        this.bag = new Bag();
-        this.current_block = new Block(this.bag.next());
-        this.next_blocks = [];
-        for (let i = 0; i < 5; i++) {
-            this.next_blocks.push(new Block(this.bag.next()));
-        }
-        this.hold_block = 0;
-        this.used_hold = false;
+        this.reset_key = this.input.keyboard.addKey('R');
 
         this.map = this.make.tilemap({
             data: this.game_grid.grid.slice(4, HEIGHT + 3),
@@ -69,10 +77,10 @@ export default class Tetris extends Phaser.Scene {
             tileHeight: 32,
         });
         const tileset = this.map.addTilesetImage('tileset');
-        this.layer = this.map.createLayer(0, tileset, 0, 0);
-        this.layer.setScale(1.5);
-
-        this.map.putTilesAt(rotations[this.current_block.type][this.current_block.rotation], this.current_block.x, this.current_block.y - 4, false, this.layer);
+        this.layer = this.map.createLayer(0, tileset, 50, 50);
+        this.layer.setScale(1.3);
+        this.init();
+        this.render_all();
 
         // rotation
         this.cw_key.on('down', () => {
@@ -134,8 +142,11 @@ export default class Tetris extends Phaser.Scene {
             this.render_all();
             this.used_hold = false;
         });
-        this.hard_drop_key.on('up', () => {
-            // do nothing
+
+        // reset
+        this.reset_key.on('down', () => {
+            this.init();
+            this.render_all();
         });
     }
 

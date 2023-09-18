@@ -7,11 +7,29 @@ export class Grid {
     constructor() {
         this.grid = [];
         for (let i = 0; i < grid_height + 4; i++) {
-            const row = [];
+            var row = [];
             for (let i = 0; i < grid_width; i++) {
                 row.push(0);
             }
             this.grid.push(row);
+        }
+    }
+
+    public find_ghost(block: Block) {
+        var ghost_y = block.y;
+        while (true) {
+            for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
+                for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
+                    if (rotations[block.type][block.rotation][i][j]
+                        && (
+                            (ghost_y + i + 1 >= this.grid.length)
+                            || this.grid[ghost_y + i + 1][block.x + j]
+                        )) {
+                        return ghost_y;
+                    }
+                }
+            }
+            ghost_y++;
         }
     }
 
@@ -22,12 +40,12 @@ export class Grid {
         const next_rotation = (block.rotation + 1) % 4;
         for (let i = 0; i < rotations[block.type][next_rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][next_rotation][i].length; j++) {
-                if (rotations[block.type][next_rotation][i][j] == 1
+                if (rotations[block.type][next_rotation][i][j]
                     && (
                         block.x + j < 0
                         || block.x + j >= grid_width
-                        || block.y + i < 0
-                        || this.grid[block.y + i][block.x + j] != 0
+                        || block.y + i >= this.grid.length
+                        || this.grid[block.y + i][block.x + j]
                     )
                 ) {
                     return;
@@ -44,12 +62,12 @@ export class Grid {
         const next_rotation = (block.rotation + 3) % 4;
         for (let i = 0; i < rotations[block.type][next_rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][next_rotation][i].length; j++) {
-                if (rotations[block.type][next_rotation][i][j] == 1
+                if (rotations[block.type][next_rotation][i][j]
                     && (
                         block.x + j < 0
                         || block.x + j >= grid_width
-                        || block.y + i < 0
-                        || this.grid[block.y + i][block.x + j] != 0
+                        || block.y + i >= this.grid.length
+                        || this.grid[block.y + i][block.x + j]
                     )
                 ) {
                     return;
@@ -126,7 +144,6 @@ export class Grid {
                             (block.y + i + 1 >= this.grid.length)
                             || (this.grid[block.y + i + 1][block.x + j] != 0)
                         )) {
-                        console.log("tap down fail");
                         down = false;
                         break;
                     }
@@ -147,23 +164,19 @@ export class Grid {
                 }
             }
         }
-        console.log(this.grid);
     }
 
-    public game_over(block: Block): boolean {
+    public game_over(): boolean {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < this.grid[i].length; j++) {
-                if (this.grid[i][j] != 0) {
+                if (this.grid[i][j]) {
                     return true;
                 }
             }
         }
-        for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
-            for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
-                if (rotations[block.type][block.rotation][i][j] == 1
-                    && this.grid[block.y + i][block.x + j] != 0) {
-                    return true;
-                }
+        for (let j = 4; j < 8; j++) {
+            if (this.grid[4][j]) {
+                return true;
             }
         }
         return false;
