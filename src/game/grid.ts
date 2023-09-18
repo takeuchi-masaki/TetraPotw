@@ -6,11 +6,11 @@ export class Grid {
 
     constructor() {
         this.grid = [];
-        const row = [];
-        for (let i = 0; i < grid_width; i++) {
-            row.push(0);
-        }
         for (let i = 0; i < grid_height + 4; i++) {
+            const row = [];
+            for (let i = 0; i < grid_width; i++) {
+                row.push(0);
+            }
             this.grid.push(row);
         }
     }
@@ -59,7 +59,7 @@ export class Grid {
         block.rotation = next_rotation;
     }
 
-    public tap_left(block: Block): void {
+    public tap_left(block: Block): boolean {
         for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
                 if (rotations[block.type][block.rotation][i][j] == 1
@@ -67,14 +67,15 @@ export class Grid {
                         (block.x + j - 1 < 0)
                         || (this.grid[block.y + i][block.x + j - 1] != 0)
                     )) {
-                    return;
+                    return false;
                 }
             }
         }
         block.x--;
+        return true;
     }
 
-    public tap_right(block: Block): void {
+    public tap_right(block: Block): boolean {
         for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
                 if (rotations[block.type][block.rotation][i][j] == 1
@@ -82,22 +83,63 @@ export class Grid {
                         (block.x + j + 1 >= grid_width)
                         || (this.grid[block.y + i][block.x + j + 1] != 0)
                     )) {
-                    return;
+                    return false;
                 }
             }
         }
         block.x++;
+        return true;
     }
 
     public hard_left(block: Block): void {
-
+        while (this.tap_left(block)) { }
     }
 
     public hard_right(block: Block): void {
-
+        while (this.tap_right(block)) { }
     }
 
     public hard_drop(block: Block): void {
+        while (true) {
+            for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
+                for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
+                    if ((rotations[block.type][block.rotation][i][j] == 1)
+                        && (
+                            (block.y + i + 1 >= this.grid.length)
+                            || (this.grid[block.y + i + 1][block.x + j] != 0)
+                        )
+                    ) {
+                        for (let ii = 0; ii < rotations[block.type][block.rotation].length; ii++) {
+                            for (let jj = 0; jj < rotations[block.type][block.rotation][ii].length; jj++) {
+                                if (rotations[block.type][block.rotation][ii][jj] == 1) {
+                                    this.grid[block.y + ii][block.x + jj] = block.type;
+                                }
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+            block.y++;
+        }
+    }
 
+    public game_over(block: Block): boolean {
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < this.grid[i].length; j++) {
+                if (this.grid[i][j] != 0) {
+                    return true;
+                }
+            }
+        }
+        for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
+            for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
+                if (rotations[block.type][block.rotation][i][j] == 1
+                    && this.grid[block.y + i][block.x + j] != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 };

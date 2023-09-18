@@ -2,7 +2,6 @@ import * as Phaser from 'phaser';
 import { HEIGHT, WIDTH } from '../constants';
 import { Block, BlockType } from './blocks';
 import { Bag } from './bag';
-import Deque from 'collections/deque'
 import { Grid } from './grid';
 
 export default class Tetris extends Phaser.Scene {
@@ -16,11 +15,11 @@ export default class Tetris extends Phaser.Scene {
     left_text: Phaser.GameObjects.Text;
     right_text: Phaser.GameObjects.Text;
 
-    grid: Grid;
+    game_grid: Grid;
     bag: Bag;
     current_block: Block;
     hold_block: BlockType;
-    next_blocks: Deque<BlockType>;
+    next_blocks: BlockType[];
 
     create() {
         this.left_key = this.input.keyboard.addKey('LEFT');
@@ -39,13 +38,42 @@ export default class Tetris extends Phaser.Scene {
             400, 800, 40, 40,
             0x000000, 1, 0xFFFFFF, 0.5);
 
-        this.grid = new Grid();
+        this.game_grid = new Grid();
         this.bag = new Bag();
         this.current_block = new Block(this.bag.next());
+        this.next_blocks = [];
         for (let i = 0; i < 5; i++) {
             this.next_blocks.push(this.bag.next());
         }
         this.hold_block = 0;
+
+        while (!this.game_grid.game_over(this.current_block)) {
+            const random_action = Phaser.Math.Between(0, 5);
+            switch (random_action) {
+                case 0:
+                    this.game_grid.tap_left(this.current_block);
+                    break;
+                case 1:
+                    this.game_grid.tap_right(this.current_block);
+                    break;
+                case 2:
+                    this.game_grid.hard_left(this.current_block);
+                    break;
+                case 3:
+                    this.game_grid.hard_right(this.current_block);
+                    break;
+                case 4:
+                    this.game_grid.rotate_cw(this.current_block);
+                    break;
+                case 5:
+                    this.game_grid.rotate_ccw(this.current_block);
+                    break;
+            }
+            this.game_grid.hard_drop(this.current_block);
+            this.current_block = new Block(this.next_blocks.shift());
+            this.next_blocks.push(this.bag.next());
+        }
+        console.log(this.game_grid.grid);
     }
 
     update() {

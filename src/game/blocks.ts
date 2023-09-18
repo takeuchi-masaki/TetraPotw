@@ -179,8 +179,8 @@ export class Block {
 
     constructor(type: BlockType) {
         this.type = type;
-        this.x = (this.type == BlockType.O ? 5 : 4);
-        this.y = grid_height + 1;
+        this.x = (this.type == BlockType.O ? 4 : 3);
+        this.y = 3;
         this.rotation = 0;
     }
 }
