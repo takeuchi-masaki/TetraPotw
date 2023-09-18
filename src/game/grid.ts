@@ -25,7 +25,8 @@ export class Grid {
                             (ghost_y + i + 1 >= this.grid.length)
                             || this.grid[ghost_y + i + 1][block.x + j]
                         )) {
-                        return ghost_y;
+                        block.ghost_y = ghost_y;
+                        return;
                     }
                 }
             }
