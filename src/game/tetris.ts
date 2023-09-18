@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { DAS, HEIGHT, WIDTH } from '../constants';
+import { DAS, HEIGHT, WIDTH, grid_height, grid_width } from '../constants';
 import { Block, BlockType, rotations } from './blocks';
 import { Bag } from './bag';
 import { Grid } from './grid';
@@ -20,8 +20,10 @@ export default class Tetris extends Phaser.Scene {
     bag: Bag;
     current_block: Block;
 
+    empty_grid: number[][];
     map: Phaser.Tilemaps.Tilemap;
     layer: Phaser.Tilemaps.TilemapLayer;
+    ghost_layer: Phaser.Tilemaps.TilemapLayer;
 
     next_blocks: BlockType[];
     next_queue: Phaser.Tilemaps.Tilemap;
@@ -47,12 +49,13 @@ export default class Tetris extends Phaser.Scene {
 
     render_grid() {
         this.map.putTilesAt(this.game_grid.grid.slice(4, HEIGHT + 3), 0, 0, false, this.layer);
+        this.map.putTilesAt(this.empty_grid, 0, 0, false, this.ghost_layer);
         for (let i = 0; i < rotations[this.current_block.type][this.current_block.rotation].length; i++) {
             for (let j = 0; j < rotations[this.current_block.type][this.current_block.rotation][i].length; j++) {
                 if (rotations[this.current_block.type][this.current_block.rotation][i][j]) {
                     this.map.putTileAt(this.current_block.type + 1, this.current_block.x + j, this.current_block.y + i - 4, false, this.layer);
                     if (this.current_block.y != this.current_block.ghost_y) {
-                        this.map.putTileAt(1, this.current_block.x + j, this.current_block.ghost_y + i - 4, false, this.layer);
+                        this.map.putTileAt(this.current_block.type + 1, this.current_block.x + j, this.current_block.ghost_y + i - 4, false, this.ghost_layer);
                     }
                 }
             }
@@ -138,14 +141,22 @@ export default class Tetris extends Phaser.Scene {
         this.reset_key = this.input.keyboard.addKey('R');
 
         // game grid
-        this.map = this.make.tilemap({
-            data: this.game_grid.grid.slice(4, HEIGHT + 3),
-            tileWidth: 32,
-            tileHeight: 32,
-        });
+        this.empty_grid = [];
+        for (let i = 0; i < grid_height; i++) {
+            const empty_row = [];
+            for (let j = 0; j < grid_width; j++) {
+                empty_row.push(-1);
+            }
+            this.empty_grid.push(empty_row);
+        }
+
+        this.map = this.make.tilemap({ width: grid_width, height: grid_height, tileWidth: 32, tileHeight: 32 });
         const tileset = this.map.addTilesetImage('tileset');
-        this.layer = this.map.createLayer(0, tileset, 200, 50);
-        this.layer.setScale(1.3);
+        const background_layer = this.map.createBlankLayer('Background', tileset, 200, 50);
+        this.map.putTilesAt(this.game_grid.grid.slice(4, grid_height + 3), 0, 0, false, background_layer);
+        this.layer = this.map.createBlankLayer('Minos', tileset, 200, 50);
+        this.ghost_layer = this.map.createBlankLayer('Ghost', tileset, 200, 50);
+        this.ghost_layer.alpha = 0.5;
         this.init();
         this.render_grid();
 
