@@ -22,7 +22,5 @@
         "rollup-plugin-serve": "^2.0.2",
         "typescript": "^5.0.3"
     },
-    "dependencies": {
-        "collections": "^5.1.13"
-    }
+    "dependencies": {}
 }

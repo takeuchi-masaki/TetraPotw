@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { HEIGHT, WIDTH } from '../constants';
 
 export default class Test extends Phaser.Scene {
     left_text: Phaser.GameObjects.Text;
@@ -14,6 +15,11 @@ export default class Test extends Phaser.Scene {
 
         this.left_text = this.add.text(10, 40, '', { font: '16px Courier', color: '#000000' });
         this.right_text = this.add.text(10, 60, '', { font: '16px Courier', color: '#000000' });
+
+        const grid: Phaser.GameObjects.Grid = this.add.grid(
+            WIDTH / 2 - 100, HEIGHT / 2,
+            400, 800, 40, 40,
+            0x000000, 1, 0xFFFFFF, 0.5);
     }
 
     update() {
