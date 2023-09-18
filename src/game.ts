@@ -1,29 +1,15 @@
 import * as Phaser from 'phaser';
-
-export default class Tetris extends Phaser.Scene
-{
-    preload ()
-    {
-        
-    }
-
-    create ()
-    {
-
-    }
-
-    update ()
-    {
-
-    }
-}
+import { HEIGHT, WIDTH } from './constants';
+import Tetris from './game/tetris';
+// import Settings from './scenes/settings';
+// import Test from './scenes/test';
 
 const config = {
     type: Phaser.AUTO,
-    width: 700,
-    height: 1080,
+    width: WIDTH,
+    height: HEIGHT,
     parent: 'game',
-    backgroundColor: 0,
+    backgroundColor: '#FFFFFF',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
