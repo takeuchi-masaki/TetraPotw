@@ -1,5 +1,6 @@
+import { off } from "process";
 import { grid_width, grid_height } from "../constants";
-import { Block, BlockType, rotations } from "./blocks";
+import { Block, BlockType, rotations, wallkick_offset } from "./blocks";
 
 export class Grid {
     public grid: number[][];
@@ -38,6 +39,7 @@ export class Grid {
         if (block.type == BlockType.O) {
             return;
         }
+        var basic_rotation = true;
         const next_rotation = (block.rotation + 1) % 4;
         for (let i = 0; i < rotations[block.type][next_rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][next_rotation][i].length; j++) {
@@ -49,17 +51,56 @@ export class Grid {
                         || this.grid[block.y + i][block.x + j]
                     )
                 ) {
-                    return;
+                    basic_rotation = false;
+                    break;
                 }
             }
+            if (!basic_rotation) {
+                break;
+            }
         }
-        block.rotation = next_rotation;
+        if (basic_rotation) {
+            block.rotation = next_rotation;
+            return;
+        }
+        const kick_offsets = wallkick_offset(block.type, block.rotation, next_rotation);
+        for (let o = 0; o < kick_offsets.length; o++) {
+            var ok = true;
+            for (let i = 0; i < rotations[block.type][next_rotation].length; i++) {
+                for (let j = 0; j < rotations[block.type][next_rotation][i].length; j++) {
+                    const curr_x = block.x + j + kick_offsets[o][0];
+                    const curr_y = block.y + i - kick_offsets[o][1];
+                    if (rotations[block.type][next_rotation][i][j]
+                        && (
+                            curr_x < 0
+                            || curr_x >= grid_width
+                            || curr_y < 0
+                            || curr_y >= this.grid.length
+                            || this.grid[curr_y][curr_x]
+                        )
+                    ) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (!ok) {
+                    break;
+                }
+            }
+            if (ok) {
+                block.rotation = next_rotation;
+                block.x += kick_offsets[o][0];
+                block.y -= kick_offsets[o][1];
+                return;
+            }
+        }
     }
 
     public rotate_ccw(block: Block): void {
         if (block.type == BlockType.O) {
             return;
         }
+        var basic_rotation = true;
         const next_rotation = (block.rotation + 3) % 4;
         for (let i = 0; i < rotations[block.type][next_rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][next_rotation][i].length; j++) {
@@ -71,11 +112,49 @@ export class Grid {
                         || this.grid[block.y + i][block.x + j]
                     )
                 ) {
-                    return;
+                    basic_rotation = false;
+                    break;
                 }
             }
+            if (!basic_rotation) {
+                break;
+            }
         }
-        block.rotation = next_rotation;
+        if (basic_rotation) {
+            block.rotation = next_rotation;
+            return;
+        }
+        const kick_offsets = wallkick_offset(block.type, block.rotation, next_rotation);
+        for (let o = 0; o < kick_offsets.length; o++) {
+            var ok = true;
+            for (let i = 0; i < rotations[block.type][next_rotation].length; i++) {
+                for (let j = 0; j < rotations[block.type][next_rotation][i].length; j++) {
+                    const curr_x = block.x + j + kick_offsets[o][0];
+                    const curr_y = block.y + i - kick_offsets[o][1];
+                    if (rotations[block.type][next_rotation][i][j]
+                        && (
+                            curr_x < 0
+                            || curr_x >= grid_width
+                            || curr_y < 0
+                            || curr_y >= this.grid.length
+                            || this.grid[curr_y][curr_x]
+                        )
+                    ) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (!ok) {
+                    break;
+                }
+            }
+            if (ok) {
+                block.rotation = next_rotation;
+                block.x += kick_offsets[o][0];
+                block.y -= kick_offsets[o][1];
+                return;
+            }
+        }
     }
 
     public tap_left(block: Block): boolean {

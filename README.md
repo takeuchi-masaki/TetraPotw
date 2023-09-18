@@ -8,8 +8,8 @@ https://takeuchi-masaki.github.io/TetraPotw/
 - [x] Low DAS (set to specific value), High ARR
 - [x] Next Queue, Hold, Ghost
 - [x] Accurate non-wallkick rotation
-- [ ] SRS wallkicks
-- [ ] Colored Ghost
+- [x] SRS wallkicks
+- [x] Colored Ghost
 - [ ] Settings Menu/Configuration
 - [ ] Run timer + countdown
 - [ ] Run details (PPS, KPP)

@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { DAS, HEIGHT, WIDTH, grid_height, grid_width } from '../constants';
-import { Block, BlockType, rotations } from './blocks';
+import { Block, BlockType, init_kickI, init_kickJLTSZ, rotations } from './blocks';
 import { Bag } from './bag';
 import { Grid } from './grid';
 
@@ -159,6 +159,8 @@ export default class Tetris extends Phaser.Scene {
         this.ghost_layer.alpha = 0.5;
         this.init();
         this.render_grid();
+        init_kickI();
+        init_kickJLTSZ();
 
         // next queue
         this.set_next_queue();
@@ -187,12 +189,20 @@ export default class Tetris extends Phaser.Scene {
             this.game_grid.rotate_cw(this.current_block);
             this.game_grid.find_ghost(this.current_block);
             this.render_grid();
+            if (this.soft_drop_key.isDown) {
+                this.game_grid.soft_drop(this.current_block);
+                this.render_grid();
+            }
         });
         this.ccw_key.on('down', () => {
             this.rotated_after = true;
             this.game_grid.rotate_ccw(this.current_block);
             this.game_grid.find_ghost(this.current_block);
             this.render_grid();
+            if (this.soft_drop_key.isDown) {
+                this.game_grid.soft_drop(this.current_block);
+                this.render_grid();
+            }
         });
 
         // left and right
@@ -247,9 +257,9 @@ export default class Tetris extends Phaser.Scene {
         });
         this.hard_drop_key.on('down', () => {
             this.game_grid.hard_drop(this.current_block);
+            this.game_grid.clear_lines();
             this.current_block = new Block(this.next_blocks.shift());
             this.next_blocks.push(this.bag.next());
-            this.game_grid.clear_lines();
             this.game_grid.find_ghost(this.current_block);
             this.render_grid();
             this.used_hold = false;
