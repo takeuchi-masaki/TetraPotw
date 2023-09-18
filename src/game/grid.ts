@@ -167,6 +167,29 @@ export class Grid {
         }
     }
 
+    public clear_lines(): number {
+        var lines_cleared = 0;
+        for (let i = 0; i < this.grid.length; i++) {
+            var full = true;
+            for (let j = 0; j < this.grid[i].length; j++) {
+                if (!this.grid[i][j]) {
+                    full = false;
+                    break;
+                }
+            }
+            if (full) {
+                lines_cleared++;
+                this.grid.splice(i, 1);
+                var row = [];
+                for (let j = 0; j < grid_width; j++) {
+                    row.push(0);
+                }
+                this.grid.unshift(row);
+            }
+        }
+        return lines_cleared;
+    }
+
     public game_over(): boolean {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < this.grid[i].length; j++) {

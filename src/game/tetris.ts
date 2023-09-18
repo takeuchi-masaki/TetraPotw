@@ -31,6 +31,7 @@ export default class Tetris extends Phaser.Scene {
     das_left: number;
     das_right: number;
     prev_time: number;
+    rotated_after: boolean;
 
 
     preload() {
@@ -43,7 +44,9 @@ export default class Tetris extends Phaser.Scene {
             for (let j = 0; j < rotations[this.current_block.type][this.current_block.rotation][i].length; j++) {
                 if (rotations[this.current_block.type][this.current_block.rotation][i][j]) {
                     this.map.putTileAt(this.current_block.type + 1, this.current_block.x + j, this.current_block.y + i - 4, false, this.layer);
-                    this.map.putTileAt(1, this.current_block.x + j, this.current_block.ghost_y + i - 4, false, this.layer);
+                    if (this.current_block.y != this.current_block.ghost_y) {
+                        this.map.putTileAt(1, this.current_block.x + j, this.current_block.ghost_y + i - 4, false, this.layer);
+                    }
                 }
             }
         }
@@ -59,6 +62,7 @@ export default class Tetris extends Phaser.Scene {
         }
         this.hold_block = 0;
         this.used_hold = false;
+        this.rotated_after = false;
         this.game_grid.find_ghost(this.current_block);
     }
 
@@ -85,11 +89,13 @@ export default class Tetris extends Phaser.Scene {
 
         // rotation
         this.cw_key.on('down', () => {
+            this.rotated_after = true;
             this.game_grid.rotate_cw(this.current_block);
             this.game_grid.find_ghost(this.current_block);
             this.render_all();
         });
         this.ccw_key.on('down', () => {
+            this.rotated_after = true;
             this.game_grid.rotate_ccw(this.current_block);
             this.game_grid.find_ghost(this.current_block);
             this.render_all();
@@ -97,6 +103,7 @@ export default class Tetris extends Phaser.Scene {
 
         // left and right
         this.left_key.on('down', () => {
+            this.rotated_after = false;
             this.last_pressed = 0;
             this.das_left = DAS;
             this.game_grid.tap_left(this.current_block);
@@ -107,6 +114,7 @@ export default class Tetris extends Phaser.Scene {
             this.das_left = DAS;
         });
         this.right_key.on('down', () => {
+            this.rotated_after = false;
             this.last_pressed = 1;
             this.das_right = DAS;
             this.game_grid.tap_right(this.current_block);
@@ -145,6 +153,7 @@ export default class Tetris extends Phaser.Scene {
             this.game_grid.hard_drop(this.current_block);
             this.current_block = this.next_blocks.shift();
             this.next_blocks.push(new Block(this.bag.next()));
+            this.game_grid.clear_lines();
             this.game_grid.find_ghost(this.current_block);
             this.render_all();
             this.used_hold = false;
@@ -163,7 +172,9 @@ export default class Tetris extends Phaser.Scene {
             if (this.right_key.isDown) {
                 this.das_right -= delta;
                 if (this.das_right < 0
-                    && this.das_right > das_min) {
+                    && (this.rotated_after || this.das_right > das_min)
+                ) {
+                    this.rotated_after = false;
                     this.das_right = das_min;
                     this.game_grid.hard_right(this.current_block);
                     this.game_grid.find_ghost(this.current_block);
@@ -174,7 +185,9 @@ export default class Tetris extends Phaser.Scene {
             if (this.left_key.isDown) {
                 this.das_left -= delta;
                 if (this.das_left < 0
-                    && this.das_left > das_min) {
+                    && (this.rotated_after || this.das_left > das_min)
+                ) {
+                    this.rotated_after = false;
                     this.das_left = das_min;
                     this.game_grid.hard_left(this.current_block);
                     this.game_grid.find_ghost(this.current_block);
