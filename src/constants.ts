@@ -1,4 +1,4 @@
-export const WIDTH = 700;
+export const WIDTH = 1080;
 export const HEIGHT = 1080;
 
 export const block_purple = "#8e3194";
