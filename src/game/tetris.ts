@@ -165,6 +165,8 @@ export default class Tetris extends Phaser.Scene {
         this.layer = this.map.createBlankLayer('Minos', tileset, 200, 50);
         this.ghost_layer = this.map.createBlankLayer('Ghost', tileset, 200, 50);
         this.ghost_layer.alpha = 0.5;
+        this.layer.scale = 1.5;
+        this.ghost_layer.scale = 1.5;
         this.init();
         this.render_grid();
         init_kickI();
