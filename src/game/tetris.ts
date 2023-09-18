@@ -244,6 +244,11 @@ export default class Tetris extends Phaser.Scene {
             this.used_hold = false;
             this.set_next_queue();
             this.render_next();
+            if (this.last_pressed) {
+                this.das_right = Math.max(this.das_right, -1);
+            } else {
+                this.das_left = Math.max(this.das_left, -1);
+            }
         });
 
         // reset
