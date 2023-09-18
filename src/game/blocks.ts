@@ -166,7 +166,7 @@ export class Block {
     constructor(type: BlockType) {
         this.type = type;
         this.x = (this.type == BlockType.O ? 4 : 3);
-        this.y = 0;
+        this.y = 3;
         this.rotation = 0;
     }
 }

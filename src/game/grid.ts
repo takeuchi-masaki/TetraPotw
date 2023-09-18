@@ -62,10 +62,10 @@ export class Grid {
     public tap_left(block: Block): boolean {
         for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
-                if (rotations[block.type][block.rotation][i][j] == 1
+                if (rotations[block.type][block.rotation][i][j]
                     && (
                         (block.x + j - 1 < 0)
-                        || (this.grid[block.y + i][block.x + j - 1] != 0)
+                        || this.grid[block.y + i][block.x + j - 1]
                     )) {
                     return false;
                 }
@@ -78,10 +78,10 @@ export class Grid {
     public tap_right(block: Block): boolean {
         for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
-                if (rotations[block.type][block.rotation][i][j] == 1
+                if (rotations[block.type][block.rotation][i][j]
                     && (
                         (block.x + j + 1 >= grid_width)
-                        || (this.grid[block.y + i][block.x + j + 1] != 0)
+                        || this.grid[block.y + i][block.x + j + 1]
                     )) {
                     return false;
                 }
@@ -99,27 +99,50 @@ export class Grid {
         while (this.tap_right(block)) { }
     }
 
-    public tap_down(block: Block): boolean {
-        for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
-            for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
-                if (rotations[block.type][block.rotation][i][j] == 1
-                    && (
-                        (block.y + i + 1 >= grid_height)
-                        || (this.grid[block.y + i][block.x + j + 1] != 0)
-                    )) {
-                    return false;
+    public soft_drop(block: Block): void {
+        while (true) {
+            for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
+                for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
+                    if (rotations[block.type][block.rotation][i][j]
+                        && (
+                            (block.y + i + 1 >= this.grid.length)
+                            || this.grid[block.y + i + 1][block.x + j]
+                        )) {
+                        return;
+                    }
                 }
             }
+            block.y++;
         }
-        block.y++;
-        return true;
     }
 
     public hard_drop(block: Block): void {
-        this.tap_down(block);
+        var down = true;
+        while (true) {
+            for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
+                for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
+                    if (rotations[block.type][block.rotation][i][j]
+                        && (
+                            (block.y + i + 1 >= this.grid.length)
+                            || (this.grid[block.y + i + 1][block.x + j] != 0)
+                        )) {
+                        console.log("tap down fail");
+                        down = false;
+                        break;
+                    }
+                }
+                if (!down) {
+                    break;
+                }
+            }
+            if (!down) {
+                break;
+            }
+            block.y++;
+        }
         for (let i = 0; i < rotations[block.type][block.rotation].length; i++) {
             for (let j = 0; j < rotations[block.type][block.rotation][i].length; j++) {
-                if (rotations[block.type][block.rotation][i][j] == 1) {
+                if (rotations[block.type][block.rotation][i][j]) {
                     this.grid[block.y + i][block.x + j] = block.type + 1;
                 }
             }

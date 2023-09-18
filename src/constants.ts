@@ -15,5 +15,5 @@ export const grid_height = 20;
 export const total_bag_cnt = 5040; // 7! = 5040
 export const bag_size = 7;
 
-export const DAS = 500;
+export const DAS = 100;
 export const ARR = 0;
