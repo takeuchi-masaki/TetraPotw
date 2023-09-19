@@ -41,6 +41,8 @@ export default class Tetris extends Phaser.Scene {
     das_right: number;
     prev_time: number;
     rotated_after: boolean;
+    lines_cleared: number;
+    lines_cleared_text: Phaser.GameObjects.Text;
 
 
     preload() {
@@ -136,6 +138,7 @@ export default class Tetris extends Phaser.Scene {
         this.rotated_after = false;
         this.game_grid.find_ghost(this.current_block);
         this.prev_time = -1;
+        this.lines_cleared = 0;
     }
 
     create() {
@@ -171,6 +174,12 @@ export default class Tetris extends Phaser.Scene {
         this.render_grid();
         init_kickI();
         init_kickJLTSZ();
+        const grid_center_x = this.layer.x + (this.layer.width * this.layer.scale) / 2;
+        const grid_center_y = this.layer.y + (this.layer.height * this.layer.scale) / 3;
+        this.lines_cleared_text = this.add.text(grid_center_x, grid_center_y, '40', { font: '100px Courier', color: '#FFFFFF' });
+        this.lines_cleared_text.alpha = 0.5;
+        this.lines_cleared_text.depth = 5;
+        this.lines_cleared_text.setOrigin(0.5, 0.5);
 
         // next queue
         this.set_next_queue();
@@ -282,7 +291,7 @@ export default class Tetris extends Phaser.Scene {
         });
         this.hard_drop_key.on('down', () => {
             this.game_grid.hard_drop(this.current_block);
-            this.game_grid.clear_lines();
+            this.lines_cleared += this.game_grid.clear_lines();
             this.current_block = new Block(this.next_blocks.shift());
             this.next_blocks.push(this.bag.next());
             this.game_grid.find_ghost(this.current_block);
@@ -348,6 +357,7 @@ export default class Tetris extends Phaser.Scene {
                 }
             }
         }
+        this.lines_cleared_text.setText(`${40 - this.lines_cleared}`);
         this.prev_time = curr_time;
     }
 }
