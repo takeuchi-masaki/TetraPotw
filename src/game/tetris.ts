@@ -94,31 +94,24 @@ export default class Tetris extends Phaser.Scene {
     }
 
     set_next_queue() {
+        const empty_row = [0, 0, 0, 0];
         this.next_queue_grid = [];
-        for (let i = 0; i < 5; i++) {
-            if (this.next_blocks[i] == BlockType.I) {
-                const empty_row = [0, 0, 0, 0];
+        this.next_blocks.forEach((block, index) => {
+            this.next_queue_grid.push(empty_row);
+            if (block == BlockType.I) {
                 const full_row = [BlockType.I + 1, BlockType.I + 1, BlockType.I + 1, BlockType.I + 1];
-                this.next_queue_grid.push(empty_row);
                 this.next_queue_grid.push(full_row);
                 this.next_queue_grid.push(empty_row);
-                continue
-            }
-            if (this.next_blocks[i] == BlockType.O) {
-                const empty_row = [0, 0, 0, 0];
-                this.next_queue_grid.push(empty_row);
-            }
-            for (let j = 0; j < rotations[this.next_blocks[i]][0].length; j++) {
-                this.next_queue_grid.push(rotations[this.next_blocks[i]][0][j]);
-                while (this.next_queue_grid[this.next_queue_grid.length - 1].length < 4) {
-                    this.next_queue_grid[this.next_queue_grid.length - 1].push(0);
+            } else {
+                for (let j = 0; j < 2; j++) {
+                    this.next_queue_grid.push(rotations[block][0][j]);
+                    while (this.next_queue_grid[this.next_queue_grid.length - 1].length < 4) {
+                        this.next_queue_grid[this.next_queue_grid.length - 1].push(0);
+                    }
                 }
             }
-            if (this.next_blocks[i] == BlockType.O) {
-                const empty_row = [0, 0, 0, 0];
-                this.next_queue_grid.push(empty_row);
-            }
-        }
+        });
+        this.next_queue_grid.push(empty_row);
     }
 
     render_next_queue() {
@@ -142,6 +135,7 @@ export default class Tetris extends Phaser.Scene {
     }
 
     create() {
+        // initialize keys
         this.left_key = this.input.keyboard.addKey('LEFT');
         this.right_key = this.input.keyboard.addKey('RIGHT');
         this.soft_drop_key = this.input.keyboard.addKey('DOWN');
@@ -150,6 +144,10 @@ export default class Tetris extends Phaser.Scene {
         this.ccw_key = this.input.keyboard.addKey('W');
         this.hold_key = this.input.keyboard.addKey('Q');
         this.reset_key = this.input.keyboard.addKey('R');
+
+        // initialize kick tables
+        init_kickI();
+        init_kickJLTSZ();
 
         // game grid
         this.empty_grid = [];
@@ -172,8 +170,7 @@ export default class Tetris extends Phaser.Scene {
         this.layer.scale = 1.5;
         this.ghost_layer.scale = 1.5;
         this.render_grid();
-        init_kickI();
-        init_kickJLTSZ();
+
         const grid_center_x = this.layer.x + (this.layer.width * this.layer.scale) / 2;
         const grid_center_y = this.layer.y + (this.layer.height * this.layer.scale) / 3;
         this.lines_cleared_text = this.add.text(grid_center_x, grid_center_y, '40', { font: '100px Courier', color: '#FFFFFF' });
@@ -190,6 +187,7 @@ export default class Tetris extends Phaser.Scene {
         });
         const next_tileset = this.next_queue.addTilesetImage('tileset');
         this.next_layer = this.next_queue.createLayer(0, next_tileset, 800, 50);
+        this.next_layer.scale = 1.3;
 
         // hold
         this.set_hold_grid();
