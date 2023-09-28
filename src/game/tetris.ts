@@ -44,6 +44,8 @@ export default class Tetris extends Phaser.Scene {
     lines_cleared: number;
     lines_cleared_text: Phaser.GameObjects.Text;
 
+    timer: Phaser.Time.TimerEvent;
+    timer_text: Phaser.GameObjects.Text;
 
     preload() {
         this.load.image('tileset', 'assets/tileset2.png');
@@ -99,8 +101,7 @@ export default class Tetris extends Phaser.Scene {
         this.next_blocks.forEach((block, index) => {
             this.next_queue_grid.push(empty_row);
             if (block == BlockType.I) {
-                const full_row = [BlockType.I + 1, BlockType.I + 1, BlockType.I + 1, BlockType.I + 1];
-                this.next_queue_grid.push(full_row);
+                this.next_queue_grid.push(rotations[block][0][1]);
                 this.next_queue_grid.push(empty_row);
             } else {
                 for (let j = 0; j < 2; j++) {
@@ -162,10 +163,10 @@ export default class Tetris extends Phaser.Scene {
         this.init();
         this.map = this.make.tilemap({ width: grid_width, height: grid_height, tileWidth: 32, tileHeight: 32 });
         const tileset = this.map.addTilesetImage('tileset');
-        const background_layer = this.map.createBlankLayer('Background', tileset, 200, 50);
+        const background_layer = this.map.createBlankLayer('Background', tileset, 250, 50);
         this.map.putTilesAt(this.game_grid.grid.slice(4, grid_height + 3), 0, 0, false, background_layer);
-        this.layer = this.map.createBlankLayer('Minos', tileset, 200, 50);
-        this.ghost_layer = this.map.createBlankLayer('Ghost', tileset, 200, 50);
+        this.layer = this.map.createBlankLayer('Minos', tileset, 250, 50);
+        this.ghost_layer = this.map.createBlankLayer('Ghost', tileset, 250, 50);
         this.ghost_layer.alpha = 0.5;
         this.layer.scale = 1.5;
         this.ghost_layer.scale = 1.5;
@@ -198,6 +199,7 @@ export default class Tetris extends Phaser.Scene {
         });
         const hold_tileset = this.hold_map.addTilesetImage('tileset');
         this.hold_layer = this.hold_map.createLayer(0, hold_tileset, 50, 50);
+        this.hold_layer.scale = 1.2;
         this.render_hold();
 
         // rotation
